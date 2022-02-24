@@ -1,3 +1,5 @@
+import React from "react";
+
 const Persons = ({ namesToShow }) => {
   return (
     <ul>
