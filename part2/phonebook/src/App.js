@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import Persons from "./components/Persons";
 import Filter from "./components/Filter";
 import PersonForm from "./components/PersonForm";
-import axios from "axios";
+import personsServices from "./services/person";
 
 const App = () => {
   const [persons, setPersons] = useState([]);
@@ -11,7 +11,7 @@ const App = () => {
   const [newKeyword, setKeyword] = useState("");
 
   useEffect(() => {
-    axios.get("http://localhost:3001/persons").then((response) => {
+    personsServices.getAll().then((response) => {
       setPersons(response.data);
     });
   }, []);
@@ -28,17 +28,24 @@ const App = () => {
     setKeyword(event.target.value);
   };
 
+  const handleDeletePerson = (id, name) => {
+    const confirm = window.confirm(`Delete ${name} ?`);
+    confirm ? personsServices.deletePerson(id) : alert("Canceled");
+  };
+
   const addPerson = (event) => {
     event.preventDefault();
     const personsObject = {
       name: newName,
       number: newNumber,
-      id: persons.length + 1,
+      id: persons.reduce((a, b) => (a.id > b.id ? a : b)).id + 1,
     };
 
     persons.map((person) => person.name === newName).indexOf(true) > -1
       ? alert(`${newName} already added to phonebook`)
-      : setPersons(persons.concat(personsObject));
+      : personsServices.create(personsObject).then((response) => {
+          setPersons(persons.concat(response.data));
+        });
     setNewName("");
     setNewNumber("");
   };
@@ -49,7 +56,7 @@ const App = () => {
       : persons.filter(
           (person) => person.name.toLowerCase() === newKeyword.toLowerCase()
         );
-  console.log(newKeyword);
+
   return (
     <div>
       <h2>Phonebook</h2>
@@ -67,7 +74,17 @@ const App = () => {
         addPerson={addPerson}
       />
       <h2>Numbers</h2>
-      <Persons namesToShow={namesToShow} />
+      <ul>
+        {namesToShow.map((person) => (
+          <Persons
+            key={person.id}
+            person={person}
+            handleDeletePerson={() =>
+              handleDeletePerson(person.id, person.name)
+            }
+          />
+        ))}
+      </ul>
     </div>
   );
 };
