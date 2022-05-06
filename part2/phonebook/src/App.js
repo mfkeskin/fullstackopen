@@ -41,13 +41,43 @@ const App = () => {
       id: persons.reduce((a, b) => (a.id > b.id ? a : b)).id + 1,
     };
 
-    persons.map((person) => person.name === newName).indexOf(true) > -1
-      ? alert(`${newName} already added to phonebook`)
-      : personsServices.create(personsObject).then((response) => {
-          setPersons(persons.concat(response.data));
-        });
-    setNewName("");
-    setNewNumber("");
+    let personPos = -1;
+
+    personPos = persons.map((person) => person.name === newName).indexOf(true);
+    const updatePerson = persons.find((p) => p.name === newName);
+
+    if (personPos > -1) {
+      const confirm = window.confirm(
+        `${newName} already added to phonebook, replace the old number with a new one?`
+      );
+      if (confirm) {
+        personsServices
+          .update(updatePerson.id, {
+            ...updatePerson,
+            number: personsObject.number,
+          })
+          .then((response) => {
+            setPersons(
+              persons.map((person) =>
+                person.id !== updatePerson.id ? person : response
+              )
+            );
+          });
+      }
+    } else {
+      personsServices.create(personsObject).then((response) => {
+        setPersons(persons.concat(response.data));
+      });
+      setNewName("");
+      setNewNumber("");
+    }
+
+    //   ? alert(`${newName} already added to phonebook`)
+    //   : personsServices.create(personsObject).then((response) => {
+    //       setPersons(persons.concat(response.data));
+    //     });
+    // setNewName("");
+    // setNewNumber("");
   };
 
   const namesToShow =
