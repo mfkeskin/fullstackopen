@@ -3,12 +3,15 @@ import Persons from "./components/Persons";
 import Filter from "./components/Filter";
 import PersonForm from "./components/PersonForm";
 import personsServices from "./services/person";
+import Notification from "./components/Notification";
 
 const App = () => {
   const [persons, setPersons] = useState([]);
   const [newName, setNewName] = useState("");
   const [newNumber, setNewNumber] = useState("");
   const [newKeyword, setKeyword] = useState("");
+  const [errorMessage, setErrorMessage] = useState(null);
+  const [messageType, setMessageType] = useState("notification");
 
   useEffect(() => {
     personsServices.getAll().then((response) => {
@@ -30,7 +33,16 @@ const App = () => {
 
   const handleDeletePerson = (id, name) => {
     const confirm = window.confirm(`Delete ${name} ?`);
-    confirm ? personsServices.deletePerson(id) : alert("Canceled");
+
+    if (confirm) {
+      personsServices.deletePerson(id).catch((error) => {
+        setErrorMessage(`'${name}' was already deleted from server.`);
+        setMessageType("warning");
+        setPersons(persons.filter((n) => n.id !== id));
+      });
+    } else {
+      alert("Canceled");
+    }
   };
 
   const addPerson = (event) => {
@@ -67,9 +79,14 @@ const App = () => {
     } else {
       personsServices.create(personsObject).then((response) => {
         setPersons(persons.concat(response.data));
+        setErrorMessage(`Added ${personsObject.name}`);
+        setMessageType("notification");
+        setTimeout(() => {
+          setErrorMessage(null);
+        }, 10000);
+        setNewName("");
+        setNewNumber("");
       });
-      setNewName("");
-      setNewNumber("");
     }
 
     //   ? alert(`${newName} already added to phonebook`)
@@ -90,6 +107,7 @@ const App = () => {
   return (
     <div>
       <h2>Phonebook</h2>
+      <Notification message={errorMessage} messageType={messageType} />
       <Filter
         newKeyword={newKeyword}
         handleKeywordChange={handleKeywordChange}

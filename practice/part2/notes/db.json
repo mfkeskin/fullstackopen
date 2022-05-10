@@ -29,6 +29,24 @@
       "date": "2022-04-06T14:45:12.502Z",
       "important": false,
       "id": 5
+    },
+    {
+      "content": "This note is not saved to server",
+      "date": "2022-05-06T20:43:35.991Z",
+      "id": 7,
+      "important": false
+    },
+    {
+      "content": "This note is not saved to server",
+      "date": "2022-05-06T20:43:48.731Z",
+      "id": 8,
+      "important": true
+    },
+    {
+      "content": "HTML is easy",
+      "date": "2022-05-06T20:44:20.689Z",
+      "id": 9,
+      "important": true
     }
   ]
 }
